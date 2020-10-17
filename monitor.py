@@ -8,6 +8,7 @@ import urllib.request
 import multiprocessing as mp
 app = Flask(__name__)
 
+number_of_processors = 8
 data_generator_name = 'generator.py'
 
 @app.route('/id')
@@ -21,11 +22,13 @@ def hello():
 
 @app.route('/show_peers')
 def show_peers():
-    available_urls = find_peers()
-    pool = mp.Pool(processes=8)
-    all_content = pool.map(get_html, available_urls)
-    pool.close()
-    return '<br>'.join([content for content in all_content if content])
+    all_content = find_peers()
+    return '<br>'.join(all_content)
+    # available_urls = find_peers()
+    # pool = mp.Pool(processes=number_of_processors)
+    # all_content = pool.map(get_html, available_urls)
+    # pool.close()
+    # return '<br>'.join([content for content in all_content if content])
 
 def get_html(url):
     try:
@@ -35,8 +38,9 @@ def get_html(url):
         return 
 
 def find_peers():
-    all_urls = ['http://192.168.0.'+str(i)+':5000/id' for i in list(range(0,256))]
-    pool = mp.Pool(processes=8)
+    all_urls = ['http://192.168.0.'+str(i)+':5000' for i in list(range(0,256))]
+    # all_urls = ['http://192.168.0.'+str(i)+':5000/id' for i in list(range(0,256))]
+    pool = mp.Pool(processes=number_of_processors)
     results = pool.map(get_html, all_urls)
     pool.close()
     return [result for result in results if result] 
