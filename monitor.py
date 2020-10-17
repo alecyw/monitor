@@ -4,8 +4,8 @@ import psutil
 import pprint 
 import socket 
 from flask import Flask
-import urllib.request, urllib.error, urllib.parse
-url = 'http://www.oldbaileyonline.org/browse.jsp?id=t17800628-33&div=t17800628-33'
+import urllib.request
+import multiprocessing as mp
 app = Flask(__name__)
 
 data_generator_name = 'generator.py'
@@ -17,14 +17,21 @@ def hello():
 
 @app.route('/show_peers')
 def show_peers():
-    all_content = ''
-    for url in available_urls:
-        response = urllib.request.urlopen(url)
-        webContent = str(response.read())
-        all_content += webContent
-        all_content += '<br>'
-    return all_content
+    available_urls = find_peers()
+    # all_content = ''
+    # for url in available_urls:
+    #     response = urllib.request.urlopen(url)
+    #     webContent = response.read()
+    #     all_content += webContent.decode('utf-8')
+    #     all_content += '<br>'
+    pool = mp.Pool(processes=8)
+    all_content = pool.map(get_html, available_urls)
+    pool.close()
+    return ''.join(all_content)
 
+def get_html(url):
+    response = urllib.request.urlopen(url)
+    return response.read().decode('utf-8')
 
 def find_peers():
     this_ip = get_Host_name_IP()
@@ -49,7 +56,6 @@ def find_peers():
     return available_servers
 
 
-  
 # Function to display hostname and 
 # IP address 
 def get_Host_name_IP(): 
@@ -91,6 +97,4 @@ def list_log():
     return output_str
 
 if __name__ == '__main__':
-    available_urls = find_peers()
     app.run()
-    # pprint.pprint(is_running('data_generator.py'))
