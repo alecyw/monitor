@@ -37,13 +37,17 @@ def get_html(url):
     except:
         return 
 
+@app.route('/find_peers') 
 def find_peers():
+    global available_urls
     # all_urls = ['http://192.168.0.'+str(i)+':5000' for i in list(range(0,256))]
     all_urls = ['http://192.168.0.'+str(i)+':5000/id' for i in list(range(0,256))]
     pool = mp.Pool(processes=number_of_processors)
     results = pool.map(get_html, all_urls)
     pool.close()
-    return [result for result in results if result] 
+    available_urls = [result for result in results if result] 
+    print(available_urls)
+    return '<br>'.join([url for url in available_urls if url])
 
 
 # Function to display hostname and 
@@ -85,6 +89,5 @@ def list_log():
     return output_str
 
 if __name__ == '__main__':
-    available_urls = find_peers()
     app.run(host='0.0.0.0')
     # print(find_peers())
