@@ -10,6 +10,10 @@ app = Flask(__name__)
 
 data_generator_name = 'generator.py'
 
+@app.route('/id')
+def id():
+    return get_Host_name_IP()
+
 @app.route('/')
 def hello():
     results = list_log()
@@ -24,30 +28,19 @@ def show_peers():
     return '<br>'.join(all_content)
 
 def get_html(url):
-    response = urllib.request.urlopen(url)
-    return response.read().decode('utf-8')
+    try:
+        print(url)
+        response = urllib.request.urlopen(url,timeout=1)
+        return response.read().decode('utf-8')
+    except:
+        return 
 
 def find_peers():
-    this_ip = get_Host_name_IP()
-    available_servers = ['http://127.0.0.1:5000','http://127.0.0.1:5000']
-    # first_part_ip = '.'.join(this_ip.split('.')[0:3])
-    # last_part_ip = this_ip.split('.')[-1]
-    # print(this_ip)
-    # print(first_part_ip)
-    # print(last_part_ip)
-    # a = list(range(0,256))
-    # # a.remove(int(last_part_ip))
-    # for guess_ip in a:
-    #     hostname = first_part_ip + '.' + str(guess_ip)
-    #     # response = os.system("ping " + hostname)
-    #     response = os.system("ping -c 1 " + hostname)
-    #     #and then check the response...
-    #     if response == 0:
-    #         print(hostname, 'is up!')
-    #         available_servers.append(hostname)
-    #     else:
-    #         print(hostname, 'is down!')
-    return available_servers
+    all_urls = ['http://192.168.0.'+str(i)+':5000/id' for i in list(range(20,33))]
+    pool = mp.Pool(processes=8)
+    results = pool.map(get_html, all_urls)
+    pool.close()
+    return [result for result in results if result] 
 
 
 # Function to display hostname and 
@@ -91,4 +84,5 @@ def list_log():
     return output_str
 
 if __name__ == '__main__':
-    app.run()
+    app.run(host='0.0.0.0')
+    # print(find_peers())
