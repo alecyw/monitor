@@ -30,7 +30,8 @@ def report_all():
     pool = mp.Pool(processes=number_of_processors)
     all_content = pool.map(get_html, available_urls)
     pool.close()
-    return '<a href=http://'+get_Host_name_IP()+':5000/report_all>report all</a><br><br>' + \
+    return '<a href=http://'+get_Host_name_IP()+':5000/>Find workstation IP addresses</a><br><br>' + \
+           '<a href=http://'+get_Host_name_IP()+':5000/report_all>report all</a><br><br>' + \
            '<br>'.join([content for content in all_content if content])
 
 @app.route('/report')
@@ -70,7 +71,7 @@ def check_is_running(processName):
     return len(listOfProcessObjects) > 0
 
 def generate_report():
-    output_str = get_Host_name_IP() + '<br>'
+    output_str = '<a href=http://' + get_Host_name_IP() + ':5000/report>' +get_Host_name_IP() + '</a><br>'
     output_str += data_generator_name
     if check_is_running(data_generator_name):
         output_str += ' is RUNNING<br>'
