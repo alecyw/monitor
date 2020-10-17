@@ -25,12 +25,12 @@ def show_peers():
     pool = mp.Pool(processes=8)
     all_content = pool.map(get_html, available_urls)
     pool.close()
-    return '<br>'.join(all_content)
+    return '<br>'.join([content for content in all_content if content])
 
 def get_html(url):
     try:
         print(url)
-        response = urllib.request.urlopen(url,timeout=1)
+        response = urllib.request.urlopen(url,timeout=10)
         return response.read().decode('utf-8')
     except:
         return 
