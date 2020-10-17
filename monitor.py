@@ -12,7 +12,7 @@ data_generator_name = 'generator.py'
 
 @app.route('/id')
 def id():
-    return get_Host_name_IP()
+    return 'http://' + get_Host_name_IP() + ':5000'
 
 @app.route('/')
 def hello():
@@ -29,14 +29,13 @@ def show_peers():
 
 def get_html(url):
     try:
-        print(url)
-        response = urllib.request.urlopen(url,timeout=10)
+        response = urllib.request.urlopen(url,timeout=1)
         return response.read().decode('utf-8')
     except:
         return 
 
 def find_peers():
-    all_urls = ['http://192.168.0.'+str(i)+':5000/id' for i in list(range(20,33))]
+    all_urls = ['http://192.168.0.'+str(i)+':5000/id' for i in list(range(0,256))]
     pool = mp.Pool(processes=8)
     results = pool.map(get_html, all_urls)
     pool.close()
@@ -49,8 +48,6 @@ def get_Host_name_IP():
     try: 
         host_name = socket.gethostname() 
         host_ip = socket.gethostbyname(host_name) 
-        print("Hostname :  ",host_name) 
-        print("IP : ",host_ip) 
     except: 
         print("Unable to get Hostname and IP")     
         host_ip=None
