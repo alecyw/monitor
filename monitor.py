@@ -1,34 +1,45 @@
 import os
 import time
 import psutil
-import pprint 
 import socket 
 from flask import Flask
 import urllib.request
 import multiprocessing as mp
 app = Flask(__name__)
 
+target_dir = './logs/'
 number_of_processors = 8
 data_generator_name = 'generator.py'
+net_prefix = 'http://192.168.0.'
+net_suffix = ':5000/id'
 
-@app.route('/id')
-def id():
-    return 'http://' + get_Host_name_IP() + ':5000'
+@app.route('/') 
+def initialize():
+    global available_urls
+    all_urls = [net_prefix + str(i) + net_suffix for i in list(range(0,256))]
+    pool = mp.Pool(processes=number_of_processors)
+    results = pool.map(get_html, all_urls)
+    pool.close()
+    available_urls = [result for result in results if result] 
+    print('initial available_urls = ', available_urls)
+    return 'Workstations found on this network:<br>'+'<br>'.join([url for url in available_urls if url]) + \
+           '<br><a href=http://'+get_Host_name_IP()+':5000/report_all>report all</a>'
 
-@app.route('/')
-def hello():
-    results = list_log()
-    return results
-
-@app.route('/show_peers')
-def show_peers():
-    # all_content = find_peers()
-    # return '<br>'.join(all_content)
-    # available_urls = find_peers()
+@app.route('/report_all')
+def report_all():
     pool = mp.Pool(processes=number_of_processors)
     all_content = pool.map(get_html, available_urls)
     pool.close()
-    return '<br>'.join([content for content in all_content if content])
+    return '<a href=http://'+get_Host_name_IP()+':5000/report_all>report all</a><br><br>' + \
+           '<br>'.join([content for content in all_content if content])
+
+@app.route('/report')
+def report():
+    return generate_report()
+
+@app.route('/id')
+def id():
+    return 'http://' + get_Host_name_IP() + ':5000/report'
 
 def get_html(url):
     try:
@@ -37,31 +48,16 @@ def get_html(url):
     except:
         return 
 
-@app.route('/find_peers') 
-def find_peers():
-    global available_urls
-    # all_urls = ['http://192.168.0.'+str(i)+':5000' for i in list(range(0,256))]
-    all_urls = ['http://192.168.0.'+str(i)+':5000/id' for i in list(range(0,256))]
-    pool = mp.Pool(processes=number_of_processors)
-    results = pool.map(get_html, all_urls)
-    pool.close()
-    available_urls = [result for result in results if result] 
-    print(available_urls)
-    return '<br>'.join([url for url in available_urls if url])
-
-
-# Function to display hostname and 
-# IP address 
 def get_Host_name_IP(): 
     try: 
         host_name = socket.gethostname() 
-        host_ip = socket.gethostbyname(host_name) 
+        host_ipad = socket.gethostbyname(host_name) 
     except: 
         print("Unable to get Hostname and IP")     
-        host_ip=None
-    return host_ip
+        host_ipad=None
+    return host_ipad
 
-def is_running(processName):
+def check_is_running(processName):
     listOfProcessObjects = []
     for proc in psutil.process_iter():
         try:
@@ -73,21 +69,23 @@ def is_running(processName):
             pass
     return len(listOfProcessObjects) > 0
 
-def list_log():
+def generate_report():
     output_str = get_Host_name_IP() + '<br>'
     output_str += data_generator_name
-    if is_running(data_generator_name):
+    if check_is_running(data_generator_name):
         output_str += ' is RUNNING<br>'
     else:
         output_str += ' is STOPPED<br>'
-    output_str += '<table border="1"><tr><td><b>date created</b></td><td><b>filename</b></td></tr>'
-    filenames = os.listdir('./logs')
+    output_str += '<table border="1">'
+    output_str += '<tr><td><b>date created</b>'
+    output_str += '</td><td><b>filename</b></td></tr>'
+    filenames = os.listdir(target_dir)
     for filename in filenames:
-        create_time = str(time.ctime(os.path.getctime('./logs/' + filename)))
-        output_str += '<tr><td>'+ create_time + '</td><td>' + filename + '</td></tr>'
+        create_time = str(time.ctime(os.path.getctime(target_dir + filename)))
+        output_str += '<tr><td>' + create_time 
+        output_str += '</td><td>' + filename + '</td></tr>'
     output_str += '</table>'
     return output_str
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0')
-    # print(find_peers())
