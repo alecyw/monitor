@@ -86,6 +86,7 @@ def generate_report():
         create_time = str(time.ctime(os.path.getctime(target_dir + filename)))
         output_str += '<tr><td>' + create_time 
         output_str += '</td><td><a href='
+        output_str += 'http://'+get_Host_name_IP()+':5000'
         output_str += '/static/'
         output_str += filename
         output_str += '>'+filename+'</a></td></tr>'
