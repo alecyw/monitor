@@ -7,9 +7,9 @@ def get_date_time_string():
     return time.strftime('%Y-%m-%d_%H-%M-%S')
 
 def save_data():
-    if not os.path.isdir(os.path.join(os.getcwd(), 'logs')):
-        os.mkdir(os.path.join(os.getcwd(), 'logs'))
-    filename = 'logs/'+ get_date_time_string() + '.txt'
+    if not os.path.isdir(os.path.join(os.getcwd(), 'static')):
+        os.mkdir(os.path.join(os.getcwd(), 'static'))
+    filename = 'static/'+ get_date_time_string() + '.txt'
     with open(filename,'w') as f:
         f.write(filename)
 

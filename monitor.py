@@ -5,9 +5,9 @@ import socket
 from flask import Flask
 import urllib.request
 import multiprocessing as mp
-app = Flask(__name__)
+app = Flask(__name__,static_url_path='/static')
 
-target_dir = './logs/'
+target_dir = './static/'
 number_of_processors = 8
 data_generator_name = 'generator.py'
 net_prefix = 'http://192.168.0.'
@@ -71,7 +71,8 @@ def check_is_running(processName):
     return len(listOfProcessObjects) > 0
 
 def generate_report():
-    output_str = '<a href=http://' + get_Host_name_IP() + ':5000/report>' +get_Host_name_IP() + '</a><br>'
+    output_str = '<a href=http://' + get_Host_name_IP() 
+    output_str += ':5000/report>' +get_Host_name_IP() + '</a><br>'
     output_str += data_generator_name
     if check_is_running(data_generator_name):
         output_str += ' is RUNNING<br>'
@@ -84,7 +85,10 @@ def generate_report():
     for filename in filenames:
         create_time = str(time.ctime(os.path.getctime(target_dir + filename)))
         output_str += '<tr><td>' + create_time 
-        output_str += '</td><td>' + filename + '</td></tr>'
+        output_str += '</td><td><a href='
+        output_str += '/static/'
+        output_str += filename
+        output_str += '>'+filename+'</a></td></tr>'
     output_str += '</table>'
     return output_str
 
