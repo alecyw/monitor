@@ -18,16 +18,10 @@ def hello():
 @app.route('/show_peers')
 def show_peers():
     available_urls = find_peers()
-    # all_content = ''
-    # for url in available_urls:
-    #     response = urllib.request.urlopen(url)
-    #     webContent = response.read()
-    #     all_content += webContent.decode('utf-8')
-    #     all_content += '<br>'
     pool = mp.Pool(processes=8)
     all_content = pool.map(get_html, available_urls)
     pool.close()
-    return ''.join(all_content)
+    return '<br>'.join(all_content)
 
 def get_html(url):
     response = urllib.request.urlopen(url)
