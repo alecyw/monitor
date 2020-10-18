@@ -54,7 +54,7 @@ def id():
 # Return the string from a url request to workstation
 def get_html(url):
     try:
-        response = urllib.request.urlopen(url,timeout=1)
+        response = urllib.request.urlopen(url,timeout=10)
         return response.read().decode('utf-8')
     except:
         return 
